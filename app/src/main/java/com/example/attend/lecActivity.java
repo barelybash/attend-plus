@@ -6,9 +6,12 @@ import static java.lang.Integer.parseInt;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.wifi.SupplicantState;
@@ -17,6 +20,9 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -36,11 +42,11 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -48,12 +54,13 @@ import java.util.concurrent.TimeUnit;
 public class lecActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    List<String> spinnerData = new ArrayList<>();
+    ArrayList<String> spinnerData = new ArrayList<>();
     String BSSID;
     String classCode;
-    List<Map> classData = new ArrayList<>();
+    ArrayList<Map> classData = new ArrayList<>();
+    ArrayList<Map> classCodesAndIds = new ArrayList<>();
     DocumentReference classRef;
-    List<Map> students = new ArrayList<>();
+    ArrayList<Map> students = new ArrayList<>();
     Integer activeTime;
     String currentDate = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
 
@@ -61,6 +68,11 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lec);
+
+        // Add toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        myToolbar.getOverflowIcon().setTint(ContextCompat.getColor(this, R.color.white));
 
         // declare views
         Button sendCodes = findViewById(R.id.sendCodes);
@@ -88,14 +100,19 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
                         String classCode = documentSnapshot.getString("classCode");
                         String className = documentSnapshot.getString("className");
                         String classId = documentSnapshot.getId();
-                        List<DocumentReference> studentRefs = (List<DocumentReference>) documentSnapshot.get("students");
+                        ArrayList<DocumentReference> studentRefs = (ArrayList<DocumentReference>) documentSnapshot.get("students");
 
                         Map <String, Object> classObj = new HashMap<>();
                         classObj.put("classCode", classCode);
                         classObj.put("classId", classId);
                         classObj.put("studentRefs", studentRefs);
 
+                        Map <String, Object> classCodeAndId = new HashMap<>();
+                        classCodeAndId.put("classCode", classCode);
+                        classCodeAndId.put("classId", classId);
+
                         classData.add(classObj);
+                        classCodesAndIds.add(classCodeAndId);
                         
 
                         String spinnerItem = classCode + " - " + className;
@@ -105,8 +122,6 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(lecActivity.this, android.R.layout.simple_spinner_dropdown_item, spinnerData);
                     spinner.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
-
-                    Log.d(TAG, classData.toString());
                 }
                 else {
                     Log.d(TAG, "Error getting documents: ", task.getException());
@@ -232,7 +247,7 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
                 String classId = (String) c.get("classId");
                 students.clear();
 
-                for (DocumentReference docRef: (List<DocumentReference>) c.get("studentRefs")) {
+                for (DocumentReference docRef: (ArrayList<DocumentReference>) c.get("studentRefs")) {
                     // generate random 6 digit code
                     String randomCode = String.format("%06d", new Random().nextInt(1000000));
                     classRef = db.document(String.format("classes/%s", classId));
@@ -251,5 +266,28 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.logOut) {
+            mAuth.signOut();
+            Intent gotoLogin = new Intent(getApplicationContext(), login.class);
+            startActivity(gotoLogin);
+        }
+        if (item.getItemId() == R.id.history) {
+            Intent gotoHistory = new Intent(getApplicationContext(), history.class);
+            gotoHistory.putStringArrayListExtra("classList", (ArrayList<String>) spinnerData);
+            gotoHistory.putExtra("classData", (Serializable) classCodesAndIds);
+            startActivity(gotoHistory);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

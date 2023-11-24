@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +17,18 @@
         android:theme="@style/Theme.Attend"
         tools:targetApi="31">
         <activity
+            android:name=".attendanceRecord"
+            android:exported="false" />
+        <activity
+            android:name=".classHistory"
+            android:exported="false"
+            android:label="@string/title_activity_class_history"
+            android:theme="@style/Theme.Attend" />
+        <activity
             android:name=".studentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".history"
             android:exported="false" />
         <activity
             android:name=".lecActivity"

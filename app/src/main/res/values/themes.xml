@@ -2,6 +2,6 @@
 <resources>
 
     <style name="Theme.Attend" parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>
