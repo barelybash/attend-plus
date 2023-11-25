@@ -25,7 +25,6 @@ import java.util.Map;
 
 public class history extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
     String classCode;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +41,6 @@ public class history extends AppCompatActivity {
 
         // initialize firebase auth
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         // get data from lecActivity
         Intent intent = getIntent();

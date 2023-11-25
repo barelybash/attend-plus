@@ -170,38 +170,38 @@ public class lecActivity extends AppCompatActivity implements AdapterView.OnItem
                                                                     String attendDocId = documentReference.getId();
 
                                                                     if(activeTimeEl.getText().toString().isEmpty()) {
-                                                                        activeTime = 15;
+                                                                        Toast.makeText(lecActivity.this,"Please enter time to keep attendance signing active.", Toast.LENGTH_SHORT).show();
                                                                     } else {
                                                                         activeTime = parseInt(activeTimeEl.getText().toString());
+
+                                                                        // start timer
+                                                                        CountDownTimer timer = new CountDownTimer(TimeUnit.MINUTES.toMillis(activeTime), 1000) {
+                                                                            @Override
+                                                                            public void onTick(long l) {
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onFinish() {
+                                                                                DocumentReference attendDocRef = db.collection("attendance").document(attendDocId);
+
+                                                                                attendDocRef.update("timesUp", true)
+                                                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                            @Override
+                                                                                            public void onSuccess(Void aVoid) {
+                                                                                                Log.d(TAG, "Document successfully updated!");
+                                                                                            }
+                                                                                        })
+                                                                                        .addOnFailureListener(new OnFailureListener() {
+                                                                                            @Override
+                                                                                            public void onFailure(@NonNull Exception e) {
+                                                                                                Log.w(TAG, "Error updating document", e);
+                                                                                            }
+                                                                                        });
+
+                                                                            }
+                                                                        };
+                                                                        timer.start();
                                                                     }
-
-                                                                    // start timer
-                                                                    CountDownTimer timer = new CountDownTimer(TimeUnit.MINUTES.toMillis(activeTime), 1000) {
-                                                                        @Override
-                                                                        public void onTick(long l) {
-                                                                        }
-
-                                                                        @Override
-                                                                        public void onFinish() {
-                                                                            DocumentReference attendDocRef = db.collection("attendance").document(attendDocId);
-
-                                                                            attendDocRef.update("timesUp", true)
-                                                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                                        @Override
-                                                                                        public void onSuccess(Void aVoid) {
-                                                                                            Log.d(TAG, "Document successfully updated!");
-                                                                                        }
-                                                                                    })
-                                                                                    .addOnFailureListener(new OnFailureListener() {
-                                                                                        @Override
-                                                                                        public void onFailure(@NonNull Exception e) {
-                                                                                            Log.w(TAG, "Error updating document", e);
-                                                                                        }
-                                                                                    });
-
-                                                                        }
-                                                                    };
-                                                                    timer.start();
                                                                 }
                                                             })
                                                             .addOnFailureListener(new OnFailureListener() {
